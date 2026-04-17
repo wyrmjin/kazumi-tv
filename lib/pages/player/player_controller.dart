@@ -15,6 +15,7 @@ import 'package:kazumi/utils/storage.dart';
 import 'package:kazumi/utils/proxy_utils.dart';
 import 'package:kazumi/utils/logger.dart';
 import 'package:kazumi/utils/utils.dart';
+import 'package:kazumi/utils/platform_detector.dart';
 import 'package:kazumi/utils/constants.dart';
 import 'package:kazumi/shaders/shaders_controller.dart';
 import 'package:kazumi/utils/syncplay.dart';
@@ -367,8 +368,9 @@ abstract class _PlayerController with Store {
     hardwareDecoder =
         setting.get(SettingBoxKey.hardwareDecoder, defaultValue: 'auto-safe');
     autoPlay = setting.get(SettingBoxKey.autoPlay, defaultValue: true);
-    lowMemoryMode =
-        setting.get(SettingBoxKey.lowMemoryMode, defaultValue: false);
+    final bool isTv = await PlatformDetector.isAndroidTV();
+    lowMemoryMode = setting.get(SettingBoxKey.lowMemoryMode,
+        defaultValue: isTv);
     playerDebugMode =
         setting.get(SettingBoxKey.playerDebugMode, defaultValue: false);
 

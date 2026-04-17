@@ -13,6 +13,7 @@ import 'package:kazumi/providers/video/providers.dart';
 import 'package:kazumi/bean/dialog/dialog_helper.dart';
 import 'package:mobx/mobx.dart';
 import 'package:kazumi/utils/utils.dart';
+import 'package:kazumi/utils/platform_detector.dart';
 import 'package:kazumi/utils/logger.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:kazumi/modules/bangumi/episode_item.dart';
@@ -123,7 +124,6 @@ abstract class _VideoPageController with Store {
         bangumiItem.nameCn.isNotEmpty ? bangumiItem.nameCn : bangumiItem.name;
     isOfflineMode = true;
     _offlineVideoPath = videoPath;
-    // 离线模式不需要解析视频源，直接设置 loading 为 false
     loading = false;
 
     // 构建仅包含已下载集数的 roadList
@@ -182,6 +182,9 @@ abstract class _VideoPageController with Store {
     return currentEpisode;
   }
 
+  bool get isRoadValid =>
+      roadList.isNotEmpty && currentRoad >= 0 && currentRoad < roadList.length;
+
   Future<void> changeEpisode(int episode,
       {int currentRoad = 0, int offset = 0}) async {
     currentEpisode = episode;
@@ -190,6 +193,17 @@ abstract class _VideoPageController with Store {
 
     if (isOfflineMode) {
       await _changeOfflineEpisode(episode, 0);
+      return;
+    }
+
+    if (!isRoadValid) {
+      errorMessage = '播放列表数据异常，请返回重试';
+      loading = false;
+      return;
+    }
+    if (episode < 1 || episode > roadList[currentRoad].data.length) {
+      errorMessage = '集数索引异常，请返回重试';
+      loading = false;
       return;
     }
 
@@ -277,10 +291,14 @@ abstract class _VideoPageController with Store {
     });
 
     try {
+      final bool isTv = await PlatformDetector.isAndroidTV();
       final source = await _videoSourceProvider!.resolve(
         url,
         useLegacyParser: currentPlugin.useLegacyParser,
         offset: offset,
+        timeout: isTv
+            ? const Duration(seconds: 30)
+            : const Duration(seconds: 15),
       );
 
       loading = false;
@@ -319,7 +337,7 @@ abstract class _VideoPageController with Store {
       errorMessage = '视频解析超时，请重试';
     } on VideoSourceCancelledException {
       KazumiLogger().i('VideoPageController: video URL resolution cancelled');
-      // 不设置 loading = false，因为可能是切换到新的集数
+      loading = false;
     } catch (e) {
       loading = false;
       errorMessage = '视频解析失败：${e.toString()}';
@@ -377,8 +395,10 @@ abstract class _VideoPageController with Store {
     }
     KazumiLogger()
         .i('VideoPageController: road list length ${roadList.length}');
-    KazumiLogger().i(
-        'VideoPageController: first road episode count ${roadList[0].data.length}');
+    if (roadList.isNotEmpty) {
+      KazumiLogger().i(
+          'VideoPageController: first road episode count ${roadList[0].data.length}');
+    }
   }
 
   void toggleSortOrder() {
