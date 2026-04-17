@@ -64,7 +64,7 @@ class TVSearchKeyboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 380,
+      width: 300,
       color: const Color(0xFF252525),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
       child: FocusTraversalGroup(

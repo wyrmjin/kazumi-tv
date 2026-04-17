@@ -38,12 +38,10 @@ class TVMenuWidgetState extends State<TVMenuWidget> {
   void initState() {
     super.initState();
 
-    // 为每个菜单项创建 FocusNode
     for (var i = 0; i < _menuItems.length; i++) {
       _itemFocusNodes.add(FocusNode(debugLabel: 'menu_item_$i'));
     }
 
-    // 初始焦点
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         requestMenuFocus();
@@ -64,6 +62,10 @@ class TVMenuWidgetState extends State<TVMenuWidget> {
     if (_itemFocusNodes.isNotEmpty && index < _itemFocusNodes.length) {
       _itemFocusNodes[index].requestFocus();
     }
+  }
+
+  bool hasFocus() {
+    return _itemFocusNodes.any((node) => node.hasFocus);
   }
 
   void _handleFocusChange(int index, bool hasFocus) {

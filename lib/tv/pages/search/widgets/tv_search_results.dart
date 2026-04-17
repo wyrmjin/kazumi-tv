@@ -24,7 +24,7 @@ class TVSearchResults extends StatefulWidget {
     this.onBack,
     this.onExitLeft,
     this.firstItemFocusNode,
-    this.crossAxisCount = 4,
+    this.crossAxisCount = 3,
   });
 
   @override

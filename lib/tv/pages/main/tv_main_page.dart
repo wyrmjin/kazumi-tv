@@ -87,6 +87,11 @@ class _TVMainPageState extends State<TVMainPage> {
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
 
+        if (!(_menuKey.currentState?.hasFocus() ?? false)) {
+          _handleExitToMenu();
+          return;
+        }
+
         final shouldExit = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
