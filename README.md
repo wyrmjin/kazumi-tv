@@ -8,21 +8,6 @@
 
 - Android TV (Android 10 及以上)
 
-## 屏幕截图
-
-<table>
-  <tr>
-    <td><img alt="" src="static/screenshot/img_1.png"></td>
-    <td><img alt="" src="static/screenshot/img_2.png"></td>
-    <td><img alt="" src="static/screenshot/img_3.png"></td>
-  <tr>
-  <tr>
-    <td><img alt="" src="static/screenshot/img_4.png"></td>
-    <td><img alt="" src="static/screenshot/img_5.png"></td>
-    <td><img alt="" src="static/screenshot/img_6.png"></td>
-  <tr>
-</table>
-
 ## 下载
 
 通过本仓库 [releases](https://github.com/sojasosse/kazumi-tv/releases) 选项卡下载：
@@ -30,59 +15,6 @@
 <a href="https://github.com/sojasosse/kazumi-tv/releases">
   <img src="static/svg/get_it_on_github.svg" alt="Get it on Github" width="200"/>
 </a>
-
-## Q&A
-
-<details>
-<summary>使用者 Q&A</summary>
-
-#### Q: 为什么少数番剧中有广告？
-
-A: 本项目未插入任何广告。广告来自视频源, 请不要相信广告中的任何内容, 并尽量选择没有广告的视频源观看。
-
-#### Q: 为什么我启用超分辨率功能后播放卡顿？
-
-A: 超分辨率功能对 GPU 性能要求较高, 如果没有在高性能独立显卡上运行 Kazumi, 尽量选择效率档而非质量档。对低分辨率视频源而非高分辨率视频源使用超分也可以降低性能消耗。
-
-#### Q: 为什么播放视频时内存占用较高？
-
-A: 本程序在视频播放时, 会尽可能多地缓存视频到内存, 以提供较好的观看体验。如果您的内存较为紧张, 可以在播放设置选项卡启用低内存模式, 这将限制缓存。
-
-#### Q: 为什么少数番剧无法通过外部播放器观看？
-
-A: 部分视频源的番剧使用了反盗链措施, 这可以被 Kazumi 解决, 但无法被外部播放器解决。
-
-</details>
-
-<details>
-<summary>规则编写者 Q&A</summary>
-
-#### Q: 为什么我的自定义规则无法实现检索？
-
-A: 目前我们对 `Xpath` 语法的支持并不完整, 我们目前只支持以 `//` 开头的选择器。建议参照我们给出的示例规则构建自定义规则。
-
-#### Q: 为什么我的自定义规则可以实现检索, 但不能实现观看？
-
-A: 尝试关闭自定义规则的使用内置播放器选项, 这将尝试使用 `webview` 进行播放, 提高兼容性。但在内置播放器可用时, 建议启用内置播放器, 以获得更加流畅并带有弹幕的观看体验。
-
-</details>
-
-<details>
-<summary>开发者 Q&A</summary>
-
-#### Q: 我在尝试自行编译该项目, 但编译没有成功
-
-A: 本项目编译需要良好的网络环境, 除了由 Google 托管的 Flutter 相关依赖外, 本项目同样依赖托管在 MavenCentral/Github/SourceForge 上的资源。如果您位于中国大陆, 可能需要设置恰当的镜像地址。
-
-</details>
-
-## 美术资源
-
-本项目图标来自 [Yuquanaaa](https://www.pixiv.net/users/66219277) 发表在 [Pixiv](https://www.pixiv.net/artworks/116666979) 上的作品。
-
-此图标由其原作者 [Yuquanaaa](https://www.pixiv.net/users/66219277) 拥有版权。我们已获得原作者的授权和许可, 可以在本项目中使用这一图标。这一图标不是自由使用的, 未经原作者明确授权, 任何人不得擅自使用、复制、修改或分发这一图标。
-
-本项目内嵌字体为 [Mi Sans](https://hyperos.mi.com/font/en/details/sc/) 字体, 由 [Xiaomi](https://www.mi.com/) 开发和拥有版权。
 
 ## 免责声明
 
