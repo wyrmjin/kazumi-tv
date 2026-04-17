@@ -241,4 +241,32 @@ abstract class _PluginsController with Store {
     }
     savePlugins();
   }
+
+  /// 从远程获取所有插件并自动安装和更新
+  Future<void> installAndUpdateAllPlugins() async {
+    try {
+      await queryPluginHTTPList();
+    } catch (e) {
+      KazumiLogger().e('Plugin: failed to fetch remote plugin list', error: e);
+      return;
+    }
+
+    int installed = 0;
+    int updated = 0;
+    for (var item in pluginHTTPList) {
+      final status = pluginStatus(item);
+      if (status == 'install' || status == 'update') {
+        final result = await tryUpdatePluginByName(item.name);
+        if (result == 0) {
+          if (status == 'install') {
+            installed++;
+          } else {
+            updated++;
+          }
+        }
+      }
+    }
+    KazumiLogger().i(
+        'Plugin: auto install/update done. installed: $installed, updated: $updated');
+  }
 }
