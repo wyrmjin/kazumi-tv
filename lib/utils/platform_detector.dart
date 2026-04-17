@@ -56,11 +56,6 @@ class PlatformDetector {
       return true;
     }
 
-    // 桌面平台视为TV环境
-    if (isDesktop()) {
-      return true;
-    }
-
     return false;
   }
 
