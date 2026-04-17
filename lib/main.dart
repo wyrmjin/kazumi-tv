@@ -16,6 +16,9 @@ import 'package:window_manager/window_manager.dart';
 import 'package:kazumi/pages/error/storage_error_page.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:kazumi/utils/platform_detector.dart';
+import 'package:kazumi/tv/tv_app.dart';
+import 'package:kazumi/tv/tv_module.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -87,6 +90,22 @@ void main() async {
       await windowManager.focus();
     });
   }
+
+  // 平台检测和自动启动切换
+  bool isTV = await PlatformDetector.isTVPlatform();
+
+  if (isTV) {
+    // TV 环境: 启动 TV 应用
+    runApp(
+      ModularApp(
+        module: TVModule(),
+        child: const TVApp(),
+      ),
+    );
+    return;
+  }
+
+  // 移动端环境: 继续原有启动流程
   Request();
   await Request.setCookie();
   ProxyManager.applyProxy();

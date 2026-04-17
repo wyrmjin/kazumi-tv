@@ -22,6 +22,7 @@ import com.ryanheise.audioservice.AudioServiceActivity
 class MainActivity: AudioServiceActivity() {
     private val CHANNEL = "com.predidit.kazumi/intent"
     private val STORAGE_CHANNEL = "com.predidit.kazumi/storage"
+    private val PLATFORM_CHANNEL = "com.predidit.kazumi/platform"
     private val PIP_CHANNEL = "com.predidit.kazumi/pip"
     private var intentChannel: MethodChannel? = null
     private var pipChannel: MethodChannel? = null
@@ -91,6 +92,21 @@ class MainActivity: AudioServiceActivity() {
             }
         }
 
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, PLATFORM_CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "isLeanback" -> {
+                    val isLeanback = packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+                    result.success(isLeanback)
+                }
+                "isTV" -> {
+                    val isTV = packageManager.hasSystemFeature(PackageManager.FEATURE_TELEVISION) ||
+                               packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+                    result.success(isTV)
+                }
+                else -> result.notImplemented()
+            }
+        }
+
         pipChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, PIP_CHANNEL)
         pipChannel?.setMethodCallHandler { call, result ->
             if (call.method == "isPictureInPictureSupported") {
@@ -128,9 +144,9 @@ class MainActivity: AudioServiceActivity() {
 
     private fun checkIfInMultiWindowMode(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            this.isInMultiWindowMode 
+            this.isInMultiWindowMode
         } else {
-            false 
+            false
         }
     }
 
