@@ -87,6 +87,7 @@ class _TVPlayerControlsState extends State<TVPlayerControls>
 
     _playerStateTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted) return;
+      if (widget.playerController.mediaPlayer == null) return;
       try {
         widget.playerController.playing =
             widget.playerController.playerPlaying;
@@ -268,13 +269,13 @@ class _TVPlayerControlsState extends State<TVPlayerControls>
   List<Widget> _buildButtons() {
     final buttons = <Widget>[];
     final currentEpisode = widget.videoPageController.currentEpisode;
-    final roadList = widget.videoPageController.roadList;
-    final currentRoad = widget.videoPageController.currentRoad;
 
     bool showPrevious = false;
     bool showNext = false;
 
-    if (roadList.isNotEmpty && currentRoad >= 0 && currentRoad < roadList.length) {
+    if (widget.videoPageController.isRoadValid) {
+      final roadList = widget.videoPageController.roadList;
+      final currentRoad = widget.videoPageController.currentRoad;
       final totalEpisodes = roadList[currentRoad].identifier.length;
       showPrevious = currentEpisode > 1;
       showNext = currentEpisode < totalEpisodes;

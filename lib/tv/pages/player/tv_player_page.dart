@@ -14,6 +14,8 @@ import 'package:kazumi/pages/video/video_controller.dart';
 import 'package:kazumi/pages/player/player_item_surface.dart';
 import 'package:kazumi/bean/dialog/dialog_helper.dart';
 import 'package:kazumi/tv/core/focus/tv_key_handler_new.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:mobx/mobx.dart';
 
 /// TV 播放器主页面
 ///
@@ -56,9 +58,9 @@ class _TVPlayerPageState extends State<TVPlayerPage> {
   bool _isControlsVisible = false;
   Timer? _controlsHideTimer;
   bool _isEpisodeMenuOpen = false;
+  ReactionDisposer? _completionReaction;
 
   bool _isSeeking = false;
-  int _seekAmount = 0;
   String _seekDirection = 'forward';
   Timer? _seekExecuteTimer;
   Timer? _seekAccumulateTimer;
@@ -114,13 +116,25 @@ class _TVPlayerPageState extends State<TVPlayerPage> {
         offset: videoPageController.historyOffset,
       );
     });
+
+    _completionReaction = reaction(
+      (_) => playerController.completed,
+      (completed) {
+        if (completed) {
+          _autoPlayNextEpisode();
+        }
+      },
+    );
   }
 
   @override
   void dispose() {
+    _completionReaction?.call();
+    _completionReaction = null;
     _controlsHideTimer?.cancel();
     _seekExecuteTimer?.cancel();
     _seekAccumulateTimer?.cancel();
+    playerController.pause();
     _pageFocusNode.dispose();
     _controlsFocusNode.dispose();
     super.dispose();
@@ -137,17 +151,34 @@ class _TVPlayerPageState extends State<TVPlayerPage> {
       return KeyEventResult.ignored;
     }
 
+    if (videoPageController.errorMessage != null) {
+      if (logicalKey == LogicalKeyboardKey.select ||
+          logicalKey == LogicalKeyboardKey.enter) {
+        videoPageController.changeEpisode(
+          videoPageController.currentEpisode,
+          currentRoad: videoPageController.currentRoad,
+          offset: 0,
+        );
+        return KeyEventResult.handled;
+      }
+      if (logicalKey == LogicalKeyboardKey.escape ||
+          logicalKey == LogicalKeyboardKey.goBack) {
+        _exitPlayer();
+        return KeyEventResult.handled;
+      }
+      return KeyEventResult.handled;
+    }
+
     if (_isControlsVisible) {
       if (logicalKey == LogicalKeyboardKey.escape ||
           logicalKey == LogicalKeyboardKey.goBack) {
         _hideControls();
         return KeyEventResult.handled;
       }
-      // 让按键事件传递到当前焦点的按钮，不要在这里消费
       return KeyEventResult.ignored;
     }
 
-    return TvKeyHandler.handleNavigation(
+    return TvKeyHandler.handleNavigationWithRepeat(
       event,
       onSelect: () {
         _showControls();
@@ -210,50 +241,53 @@ class _TVPlayerPageState extends State<TVPlayerPage> {
     setState(() {
       _isSeeking = true;
       _seekDirection = direction;
-      _seekAmount += _seekStep;
     });
 
-    _scheduleSeekExecute();
-
     if (isRepeat && _seekAccumulateTimer == null) {
+      _doSeekStep();
       _seekAccumulateTimer = Timer.periodic(
         Duration(milliseconds: _seekAccumulateInterval),
-        (_) {
-          setState(() {
-            _seekAmount += _seekStep;
-          });
-        },
+        (_) => _doSeekStep(),
       );
     }
+
+    _scheduleSeekStop();
   }
 
-  void _scheduleSeekExecute() {
+  void _scheduleSeekStop() {
     _seekExecuteTimer?.cancel();
     _seekExecuteTimer = Timer(
       Duration(milliseconds: _seekExecuteDelay),
       () {
-        _executeSeek();
+        final wasContinuous = _seekAccumulateTimer != null;
+        _seekAccumulateTimer?.cancel();
+        _seekAccumulateTimer = null;
+
+        if (!wasContinuous) {
+          _doSeekStep();
+        }
+
+        setState(() {
+          _isSeeking = false;
+        });
       },
     );
   }
 
-  void _executeSeek() {
-    _seekAccumulateTimer?.cancel();
-    _seekAccumulateTimer = null;
-
+  void _doSeekStep() {
     final currentPosition = playerController.playerPosition;
     final duration = playerController.playerDuration;
-    final seekOffset = Duration(seconds: _seekAmount);
+    final offset = Duration(seconds: _seekStep);
 
     Duration newPosition;
     if (_seekDirection == 'forward') {
-      newPosition = currentPosition + seekOffset;
+      newPosition = currentPosition + offset;
       if (newPosition > duration) {
         newPosition = duration;
         KazumiDialog.showToast(message: '已在结尾');
       }
     } else {
-      newPosition = currentPosition - seekOffset;
+      newPosition = currentPosition - offset;
       if (newPosition < Duration.zero) {
         newPosition = Duration.zero;
         KazumiDialog.showToast(message: '已在开头');
@@ -261,11 +295,6 @@ class _TVPlayerPageState extends State<TVPlayerPage> {
     }
 
     playerController.seek(newPosition);
-
-    setState(() {
-      _isSeeking = false;
-      _seekAmount = 0;
-    });
   }
 
   void _onPlayPause() {
@@ -284,7 +313,7 @@ class _TVPlayerPageState extends State<TVPlayerPage> {
     final roadList = videoPageController.roadList;
     final currentRoad = videoPageController.currentRoad;
 
-    if (roadList.isEmpty || currentRoad >= roadList.length) {
+    if (!videoPageController.isRoadValid) {
       KazumiDialog.showToast(message: '播放列表加载中，请稍候');
       _startControlsHideTimer();
       return;
@@ -313,6 +342,28 @@ class _TVPlayerPageState extends State<TVPlayerPage> {
   void _onNextEpisode() => _onChangeEpisode(1);
 
   void _onPreviousEpisode() => _onChangeEpisode(-1);
+
+  void _autoPlayNextEpisode() {
+    if (videoPageController.loading) return;
+
+    final roadList = videoPageController.roadList;
+    final currentRoad = videoPageController.currentRoad;
+    final currentEpisode = videoPageController.currentEpisode;
+
+    if (!videoPageController.isRoadValid) return;
+
+    final totalEpisodes = roadList[currentRoad].identifier.length;
+    final nextEpisode = currentEpisode + 1;
+
+    if (nextEpisode > totalEpisodes) {
+      KazumiDialog.showToast(message: '已经是最新一集');
+      return;
+    }
+
+    final identifier = roadList[currentRoad].identifier[nextEpisode - 1];
+    KazumiDialog.showToast(message: '正在加载$identifier');
+    videoPageController.changeEpisode(nextEpisode, currentRoad: currentRoad);
+  }
 
   void _onDanmakuToggle() {
     try {
@@ -390,10 +441,38 @@ class _TVPlayerPageState extends State<TVPlayerPage> {
                 ),
               ),
             ),
+            Observer(
+              builder: (_) {
+                final errorMsg = videoPageController.errorMessage;
+                if (errorMsg == null) return const SizedBox.shrink();
+                return Container(
+                  color: Colors.black,
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.error_outline, color: Colors.white54, size: 48),
+                        const SizedBox(height: 16),
+                        Text(
+                          errorMsg,
+                          style: const TextStyle(color: Colors.white70, fontSize: 16),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          '按确认键重试',
+                          style: TextStyle(color: Colors.white38, fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
             TVProgressIndicator(
               isVisible: _isSeeking,
               direction: _seekDirection,
-              amount: _seekAmount,
+              amount: _seekStep,
             ),
             TVPlayerControls(
               isVisible: _isControlsVisible,
