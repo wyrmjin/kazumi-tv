@@ -31,9 +31,11 @@ class _TVPopularPageState extends State<TVPopularPage> {
   late final PopularController _controller;
   late final TvFocusScopeManager _focusManager;
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _tabScrollController = ScrollController();
 
   final List<FocusNode> _tabItemNodes = [];
   final Map<int, FocusNode> _gridItemNodes = {};
+  final List<GlobalKey> _tabKeys = [];
 
   int _selectedTabIndex = 0;
   final List<String> _tabs = ['', ...defaultAnimeTags];
@@ -66,6 +68,7 @@ class _TVPopularPageState extends State<TVPopularPage> {
       } else {
         _tabItemNodes.add(FocusNode(debugLabel: 'tab_item_$i'));
       }
+      _tabKeys.add(GlobalKey(debugLabel: 'tab_key_$i'));
     }
 
     _scrollController.addListener(_onScroll);
@@ -81,6 +84,7 @@ class _TVPopularPageState extends State<TVPopularPage> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _tabScrollController.dispose();
     _focusManager.dispose();
     for (int i = 0; i < _tabItemNodes.length; i++) {
       if (i != _selectedTabIndex || widget.contentFocusNode == null) {
@@ -113,6 +117,9 @@ class _TVPopularPageState extends State<TVPopularPage> {
   void _handleTabSelected(int index, bool moveToGrid) {
     if (_selectedTabIndex == index) return;
 
+    _gridItemNodes.forEach((_, node) => node.dispose());
+    _gridItemNodes.clear();
+
     setState(() {
       _selectedTabIndex = index;
     });
@@ -138,6 +145,8 @@ class _TVPopularPageState extends State<TVPopularPage> {
       _controller.queryBangumiByTag(type: 'init');
     }
 
+    _scrollTabToVisible(index);
+
     if (moveToGrid) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -145,6 +154,19 @@ class _TVPopularPageState extends State<TVPopularPage> {
         }
       });
     }
+  }
+
+  void _scrollTabToVisible(int index) {
+    if (!_tabScrollController.hasClients) return;
+    final key = _tabKeys[index];
+    final context = key.currentContext;
+    if (context == null) return;
+    Scrollable.ensureVisible(
+      context,
+      alignment: 0.5,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOut,
+    );
   }
 
   void requestInitialFocus() {
@@ -192,66 +214,76 @@ class _TVPopularPageState extends State<TVPopularPage> {
         onExitDown: () => _focusManager.requestFocus('grid_area'),
         onExitLeft: widget.onExitToMenu,
         isFirst: true,
-        child: Row(
-          children: _tabs.asMap().entries.map((entry) {
-            final index = entry.key;
-            final isSelected = index == _selectedTabIndex;
+        child: SizedBox(
+          height: 48,
+          child: ListView.custom(
+            controller: _tabScrollController,
+            scrollDirection: Axis.horizontal,
+            childrenDelegate: SliverChildListDelegate(
+              _tabs.asMap().entries.map((entry) {
+                final index = entry.key;
+                final isSelected = index == _selectedTabIndex;
 
-            final isLastTab = index == _tabs.length - 1;
-            final nextTabNode = isLastTab ? null : _tabItemNodes[index + 1];
-            final prevTabNode = index == 0 ? null : _tabItemNodes[index - 1];
+                final isLastTab = index == _tabs.length - 1;
+                final nextTabNode = isLastTab ? null : _tabItemNodes[index + 1];
+                final prevTabNode = index == 0 ? null : _tabItemNodes[index - 1];
 
-            return Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: TvHorizontalListItem(
-                focusNode: _tabItemNodes[index],
-                autofocus: index == _selectedTabIndex,
-                onFocusChange: (focused) {
-                  if (focused && index != _selectedTabIndex) {
-                    _handleTabSelected(index, false);
-                  }
-                  setState(() {});
-                },
-                isFirst: index == 0,
-                isLast: isLastTab,
-                exitLeft: prevTabNode,
-                exitRight: nextTabNode,
-                onMoveDown: () => _getGridItemNode(0).requestFocus(),
-                onSelect: () => _handleTabSelected(index, true),
-                child: TvCardVisual(
-                  isFocused: _tabItemNodes[index].hasFocus,
-                  borderRadius: 8,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? const Color(0xFF4338CA)
-                          : const Color(0xFF2D2D2D),
-                      borderRadius: BorderRadius.circular(8),
-                      border: _tabItemNodes[index].hasFocus
-                          ? Border.all(color: Colors.white, width: 2)
-                          : isSelected
-                              ? Border.all(
-                                  color: const Color(0xFF6366F1), width: 2)
-                              : null,
-                    ),
-                    child: Text(
-                      entry.value.isEmpty ? '热门番组' : entry.value,
-                      style: TextStyle(
-                        color: _tabItemNodes[index].hasFocus || isSelected
-                            ? Colors.white
-                            : const Color(0xFF888888),
-                        fontSize: 16,
-                        fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.normal,
+                return Padding(
+                  key: _tabKeys[index],
+                  padding: const EdgeInsets.only(right: 16),
+                  child: TvHorizontalListItem(
+                    focusNode: _tabItemNodes[index],
+                    autofocus: index == _selectedTabIndex,
+                    onFocusChange: (focused) {
+                      if (focused && index != _selectedTabIndex) {
+                        _handleTabSelected(index, false);
+                      } else if (focused) {
+                        _scrollTabToVisible(index);
+                      }
+                      if (focused) setState(() {});
+                    },
+                    isFirst: index == 0,
+                    isLast: isLastTab,
+                    exitLeft: prevTabNode,
+                    exitRight: nextTabNode,
+                    onMoveDown: () => _getGridItemNode(0).requestFocus(),
+                    onSelect: () => _handleTabSelected(index, true),
+                    child: TvCardVisual(
+                      isFocused: _tabItemNodes[index].hasFocus,
+                      borderRadius: 8,
+                      child: Container(
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? const Color(0xFF4338CA)
+                              : const Color(0xFF2D2D2D),
+                          borderRadius: BorderRadius.circular(8),
+                          border: _tabItemNodes[index].hasFocus
+                              ? Border.all(color: Colors.white, width: 2)
+                              : isSelected
+                                  ? Border.all(
+                                      color: const Color(0xFF6366F1), width: 2)
+                                  : null,
+                        ),
+                        child: Text(
+                          entry.value.isEmpty ? '热门番组' : entry.value,
+                          style: TextStyle(
+                            color: _tabItemNodes[index].hasFocus || isSelected
+                                ? Colors.white
+                                : const Color(0xFF888888),
+                            fontSize: 16,
+                            fontWeight:
+                                isSelected ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
-            );
-          }).toList(),
+                );
+              }).toList(),
+            ),
+          ),
         ),
       ),
     );
