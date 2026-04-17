@@ -38,16 +38,20 @@ class DanmakuEpisodeResponse {
   });
 
   factory DanmakuEpisodeResponse.fromJson(Map<String, dynamic> json) {
-    var list = json['bangumi']['episodes'] as List;
+    final bangumi = json['bangumi'];
+    if (bangumi == null) {
+      return DanmakuEpisodeResponse.fromTemplate();
+    }
+    var list = bangumi['episodes'] as List? ?? [];
     List<DanmakuEpisode> episodeList =
         list.map((i) => DanmakuEpisode.fromJson(i)).toList();
 
     return DanmakuEpisodeResponse(
-      bangumiId: json['bangumi']['animeId'],
+      bangumiId: bangumi['animeId'] ?? 0,
       episodes: episodeList,
-      errorCode: json['errorCode'],
-      success: json['success'],
-      errorMessage: json['errorMessage'],
+      errorCode: json['errorCode'] ?? -1,
+      success: json['success'] ?? false,
+      errorMessage: json['errorMessage'] ?? '',
     );
   }
 

@@ -482,6 +482,10 @@ abstract class _PlayerController with Store {
       play: autoPlay,
     );
 
+    if (autoPlay) {
+      playing = true;
+    }
+
     return mediaPlayer!;
   }
 
