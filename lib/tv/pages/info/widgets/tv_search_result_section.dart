@@ -15,6 +15,7 @@ import 'package:kazumi/bean/dialog/dialog_helper.dart';
 import '../../../core/widgets/tv_button.dart';
 import '../../../core/focus/tv_list_items.dart';
 import 'tv_search_result_card.dart';
+import 'tv_captcha_keyboard.dart';
 
 /// TV 番剧详情页右侧搜索结果区
 class TVSearchResultSection extends StatefulWidget {
@@ -353,6 +354,9 @@ class _TVSearchResultSectionState extends State<TVSearchResultSection> {
       focusNodes.add(
           FocusNode(debugLabel: '${plugin.name}_result_${focusNodes.length}'));
     }
+    while (focusNodes.length > results.length) {
+      focusNodes.removeLast().dispose();
+    }
 
     if (focusNodes.isNotEmpty) {
       widget.onFirstFocusNodeReady?.call(focusNodes[0]);
@@ -407,7 +411,7 @@ class _TVSearchResultSectionState extends State<TVSearchResultSection> {
   void _showImageCaptchaDialog(Plugin plugin) {
     final captchaImageNotifier = ValueNotifier<String?>(null);
     final submittingNotifier = ValueNotifier<bool>(false);
-    final codeController = TextEditingController();
+    final codeNotifier = ValueNotifier<String>('');
     bool verified = false;
 
     _captchaProvider?.dispose();
@@ -428,13 +432,13 @@ class _TVSearchResultSectionState extends State<TVSearchResultSection> {
 
     Future<void> doSubmit() async {
       if (submittingNotifier.value) return;
-      if (codeController.text.trim().isEmpty) {
+      if (codeNotifier.value.trim().isEmpty) {
         KazumiDialog.showToast(message: '请输入验证码');
         return;
       }
       submittingNotifier.value = true;
       await _captchaProvider?.submitCaptcha(
-        captchaCode: codeController.text.trim(),
+        captchaCode: codeNotifier.value.trim(),
         inputXpath: plugin.antiCrawlerConfig.captchaInput,
         buttonXpath: plugin.antiCrawlerConfig.captchaButton,
         pluginName: plugin.name,
@@ -465,8 +469,8 @@ class _TVSearchResultSectionState extends State<TVSearchResultSection> {
       builder: (dialogContext) {
         return Dialog(
           child: Container(
-            width: 600,
-            padding: const EdgeInsets.all(24),
+            width: 500,
+            padding: const EdgeInsets.all(20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -476,7 +480,7 @@ class _TVSearchResultSectionState extends State<TVSearchResultSection> {
                 ),
                 const SizedBox(height: 8),
                 Text('${plugin.name} 需要验证码验证'),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 ValueListenableBuilder<String?>(
                   valueListenable: captchaImageNotifier,
                   builder: (context, imageUrl, _) {
@@ -492,88 +496,49 @@ class _TVSearchResultSectionState extends State<TVSearchResultSection> {
                     return ValueListenableBuilder<bool>(
                       valueListenable: submittingNotifier,
                       builder: (context, isSubmitting, _) {
-                        return Column(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.memory(
-                                base64Decode(imageUrl.split(',').last),
-                                height: 80,
-                                fit: BoxFit.contain,
-                                errorBuilder: (context, error, _) =>
-                                    const Text('图片解码失败'),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              width: 300,
-                              child: TextField(
-                                controller: codeController,
-                                autofocus: true,
-                                enabled: !isSubmitting,
-                                decoration: const InputDecoration(
-                                  labelText: '请输入验证码',
-                                  border: OutlineInputBorder(),
+                        return ValueListenableBuilder<String>(
+                          valueListenable: codeNotifier,
+                          builder: (context, codeText, _) {
+                            return Column(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.memory(
+                                    base64Decode(imageUrl.split(',').last),
+                                    height: 60,
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (context, error, _) =>
+                                        const Text('图片解码失败'),
+                                  ),
                                 ),
-                                onSubmitted:
-                                    isSubmitting ? null : (_) => doSubmit(),
+                                const SizedBox(height: 12),
+                                TVCaptchaKeyboard(
+                                  text: codeText,
+                                  onTextChanged: (val) {
+                                    codeNotifier.value = val;
+                                  },
+                                  onSubmit: doSubmit,
+                                  onCancel: () => Navigator.of(context).pop(),
+                                  onBack: () => Navigator.of(context).pop(),
+                                  enabled: !isSubmitting,
+                                ),
+                            if (isSubmitting)
+                              const Padding(
+                                padding: EdgeInsets.only(top: 8),
+                                child: SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
                               ),
-                            ),
                           ],
                         );
                       },
                     );
                   },
-                ),
-                const SizedBox(height: 20),
-                ListenableBuilder(
-                  listenable: Listenable.merge(
-                      [captchaImageNotifier, submittingNotifier]),
-                  builder: (context, _) {
-                    final isImageLoading = captchaImageNotifier.value == null;
-                    final isSubmitting = submittingNotifier.value;
-                    final isDisabled = isImageLoading || isSubmitting;
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          width: 120,
-                          height: 50,
-                          child: TVButton(
-                            onTap: isDisabled
-                                ? () {}
-                                : () => Navigator.of(context).pop(),
-                            child: Center(
-                              child: Text(
-                                '取消',
-                                style: TextStyle(
-                                  color: isDisabled ? Colors.white38 : null,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        SizedBox(
-                          width: 120,
-                          height: 50,
-                          child: TVButton(
-                            onTap: isDisabled ? () {} : doSubmit,
-                            child: Center(
-                              child: isSubmitting
-                                  ? const SizedBox(
-                                      width: 18,
-                                      height: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Text('提交'),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
+                );
                   },
                 ),
               ],
@@ -585,7 +550,7 @@ class _TVSearchResultSectionState extends State<TVSearchResultSection> {
       _captchaVerifyTimer?.cancel();
       _captchaVerifyTimer = null;
       imageSub.cancel();
-      codeController.dispose();
+      codeNotifier.dispose();
       captchaImageNotifier.dispose();
       submittingNotifier.dispose();
       final provider = _captchaProvider;
