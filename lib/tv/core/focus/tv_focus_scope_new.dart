@@ -105,7 +105,7 @@ class TvFocusScope extends StatelessWidget {
               : (isFirst ? null : _getExitUpHandler()),
           onDown: onExitDown != null
               ? _getExitDownHandler()
-              : (isLast ? null : _getExitDownHandler()),
+              : (isLast ? _consumeEvent : _getExitDownHandler()),
           onLeft: _getExitLeftHandler(),
           onRight: _getExitRightHandler(),
           onEnter: _getSelectHandler(),
@@ -122,7 +122,7 @@ class TvFocusScope extends StatelessWidget {
               : (isFirst ? null : _getExitLeftHandler()),
           onRight: onExitRight != null
               ? _getExitRightHandler()
-              : (isLast ? null : _getExitRightHandler()),
+              : (isLast ? _consumeEvent : _getExitRightHandler()),
           onEnter: _getSelectHandler(),
           onSelect: _getSelectHandler(),
         );
@@ -139,6 +139,9 @@ class TvFocusScope extends StatelessWidget {
         );
     }
   }
+
+  /// 消费事件但不执行任何操作（用于边界阻断）
+  static KeyEventResult _consumeEvent() => KeyEventResult.handled;
 
   /// 获取上方退出处理器
   KeyEventResult Function()? _getExitUpHandler() {

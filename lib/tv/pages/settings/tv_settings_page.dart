@@ -3,6 +3,7 @@ import 'package:kazumi/tv/core/focus/tv_focus_scope_new.dart';
 import 'package:kazumi/tv/core/focus/tv_focus_scope_manager.dart';
 import 'package:kazumi/tv/core/focus/tv_list_items.dart';
 import 'package:kazumi/tv/core/focus/focus_pattern.dart';
+import 'package:kazumi/tv/core/utils/tv_constants.dart';
 import 'package:kazumi/tv/core/widgets/tv_card_visual.dart';
 import 'player/tv_player_settings_page.dart';
 import 'danmaku/tv_danmaku_settings_page.dart';
@@ -99,10 +100,17 @@ class _TVSettingsPageState extends State<TVSettingsPage> {
   Widget _buildTabBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      decoration: const BoxDecoration(
-        color: Color(0xFF1A1A1A),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            TVConstants.surfaceColor,
+            TVConstants.backgroundColor,
+          ],
+        ),
         border: Border(
-          bottom: BorderSide(color: Color(0xFF333333), width: 1),
+          bottom: BorderSide(color: TVConstants.dividerColor, width: 1),
         ),
       ),
       child: TvFocusScope(
@@ -141,21 +149,16 @@ class _TVSettingsPageState extends State<TVSettingsPage> {
                 onSelect: () => _handleMenuSelected(index, true),
                 child: TvCardVisual(
                   isFocused: _tabItemNodes[index].hasFocus,
-                  borderRadius: 8,
+                  borderRadius: 10,
+                  focusColor: TVConstants.focusColor,
                   child: Container(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? const Color(0xFF4338CA)
-                          : const Color(0xFF2D2D2D),
-                      borderRadius: BorderRadius.circular(8),
-                      border: _tabItemNodes[index].hasFocus
-                          ? Border.all(color: Colors.white, width: 2)
-                          : isSelected
-                              ? Border.all(
-                                  color: const Color(0xFF6366F1), width: 2)
-                              : null,
+                          ? TVConstants.focusColor
+                          : TVConstants.surfaceVariantColor,
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -164,7 +167,7 @@ class _TVSettingsPageState extends State<TVSettingsPage> {
                           item.icon,
                           color: _tabItemNodes[index].hasFocus || isSelected
                               ? Colors.white
-                              : const Color(0xFF888888),
+                              : TVConstants.textTertiaryColor,
                           size: 18,
                         ),
                         const SizedBox(width: 8),
@@ -173,8 +176,8 @@ class _TVSettingsPageState extends State<TVSettingsPage> {
                           style: TextStyle(
                             color: _tabItemNodes[index].hasFocus || isSelected
                                 ? Colors.white
-                                : const Color(0xFF888888),
-                            fontSize: 16,
+                                : TVConstants.textTertiaryColor,
+                            fontSize: 15,
                             fontWeight: isSelected
                                 ? FontWeight.bold
                                 : FontWeight.normal,

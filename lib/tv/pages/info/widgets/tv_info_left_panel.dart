@@ -73,13 +73,14 @@ class TVInfoLeftPanel extends StatelessWidget {
   Widget _buildCoverImage(double screenWidth, double screenHeight) {
     final imageUrl =
         bangumiItem.images['large'] ?? bangumiItem.images['common'] ?? '';
+    final imageWidth = screenWidth * 0.4 - 48;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: NetworkImgLayer(
         src: imageUrl,
-        width: screenWidth * 0.4 - 48,
-        height: screenHeight * 0.4,
+        width: imageWidth,
+        height: imageWidth * 4 / 3,
         type: 'bg',
       ),
     );

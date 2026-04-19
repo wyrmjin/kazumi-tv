@@ -8,6 +8,7 @@ import 'package:kazumi/tv/core/focus/tv_focus_scope_new.dart';
 import 'package:kazumi/tv/core/focus/tv_focus_scope_manager.dart';
 import 'package:kazumi/tv/core/focus/tv_list_items.dart';
 import 'package:kazumi/tv/core/focus/focus_pattern.dart';
+import 'package:kazumi/tv/core/utils/tv_constants.dart';
 import 'package:kazumi/tv/core/widgets/tv_card_visual.dart';
 import 'package:kazumi/tv/widgets/tv_bangumi_card.dart';
 
@@ -116,9 +117,16 @@ class _TVCollectPageState extends State<TVCollectPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            TVConstants.surfaceColor,
+            TVConstants.backgroundColor,
+          ],
+        ),
         border: Border(
-          bottom: BorderSide(color: const Color(0xFF333333), width: 1),
+          bottom: BorderSide(color: TVConstants.dividerColor, width: 1),
         ),
       ),
       child: TvFocusScope(
@@ -157,29 +165,24 @@ class _TVCollectPageState extends State<TVCollectPage> {
                 onSelect: () => _handleTabSelected(index, true),
                 child: TvCardVisual(
                   isFocused: _tabItemNodes[index].hasFocus,
-                  borderRadius: 8,
+                  borderRadius: 10,
+                  focusColor: TVConstants.focusColor,
                   child: Container(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? const Color(0xFF4338CA)
-                          : const Color(0xFF2D2D2D),
-                      borderRadius: BorderRadius.circular(8),
-                      border: _tabItemNodes[index].hasFocus
-                          ? Border.all(color: Colors.white, width: 2)
-                          : isSelected
-                              ? Border.all(
-                                  color: const Color(0xFF6366F1), width: 2)
-                              : null,
+                          ? TVConstants.focusColor
+                          : TVConstants.surfaceVariantColor,
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
                       label,
                       style: TextStyle(
                         color: _tabItemNodes[index].hasFocus || isSelected
                             ? Colors.white
-                            : const Color(0xFF888888),
-                        fontSize: 16,
+                            : TVConstants.textTertiaryColor,
+                        fontSize: 15,
                         fontWeight:
                             isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
@@ -204,10 +207,10 @@ class _TVCollectPageState extends State<TVCollectPage> {
     return GridView.builder(
       padding: const EdgeInsets.all(24),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        crossAxisSpacing: 24,
-        mainAxisSpacing: 24,
-        childAspectRatio: 0.65,
+        crossAxisCount: 5,
+        crossAxisSpacing: TVConstants.cardSpacing,
+        mainAxisSpacing: TVConstants.cardSpacing,
+        childAspectRatio: TVConstants.cardWidth / TVConstants.cardHeight,
       ),
       itemCount: items.length,
       itemBuilder: (context, index) {
@@ -223,7 +226,7 @@ class _TVCollectPageState extends State<TVCollectPage> {
     return TvGridItem(
       focusNode: node,
       index: index,
-      crossAxisCount: 4,
+      crossAxisCount: 5,
       totalItems: totalItems,
       exitUp: _tabItemNodes[_selectedTabIndex],
       onExitLeft: widget.onExitToMenu,
@@ -266,13 +269,13 @@ class _TVCollectPageState extends State<TVCollectPage> {
           Icon(
             Icons.inbox_outlined,
             size: 64,
-            color: const Color(0xFF888888),
+            color: TVConstants.textTertiaryColor,
           ),
           const SizedBox(height: 16),
           Text(
             messages[_selectedTabIndex] ?? '暂无内容',
             style: const TextStyle(
-              color: Color(0xFF888888),
+              color: TVConstants.textTertiaryColor,
               fontSize: 18,
             ),
           ),

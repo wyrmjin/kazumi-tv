@@ -237,8 +237,9 @@ class _TVPopularPageState extends State<TVPopularPage> {
                 final nextTabNode = isLastTab ? null : _tabItemNodes[index + 1];
                 final prevTabNode = index == 0 ? null : _tabItemNodes[index - 1];
 
-                return Padding(
+                return Center(
                   key: _tabKeys[index],
+                  child: Padding(
                   padding: const EdgeInsets.only(right: 12),
                   child: TvHorizontalListItem(
                     focusNode: _tabItemNodes[index],
@@ -249,7 +250,7 @@ class _TVPopularPageState extends State<TVPopularPage> {
                       } else if (focused) {
                         _scrollTabToVisible(index);
                       }
-                      if (focused) setState(() {});
+                      setState(() {});
                     },
                     isFirst: index == 0,
                     isLast: isLastTab,
@@ -283,6 +284,7 @@ class _TVPopularPageState extends State<TVPopularPage> {
                         ),
                       ),
                     ),
+                  ),
                   ),
                 );
               }).toList(),
