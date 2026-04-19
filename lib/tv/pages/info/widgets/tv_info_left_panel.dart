@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kazumi/bean/card/network_img_layer.dart';
 import 'package:kazumi/modules/bangumi/bangumi_item.dart';
 import '../../../core/widgets/tv_marquee.dart';
+import '../../../core/utils/tv_constants.dart';
 import 'tv_collect_button.dart';
 
 /// TV 番剧详情页左侧信息区
@@ -29,6 +30,14 @@ class TVInfoLeftPanel extends StatelessWidget {
     return Container(
       width: screenWidth * 0.4,
       padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        border: Border(
+          right: BorderSide(
+            color: TVConstants.borderFaintColor,
+            width: 1,
+          ),
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -85,9 +94,10 @@ class TVInfoLeftPanel extends StatelessWidget {
       height: 40,
       child: TVMarquee(
         text: title,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.bold,
+          color: TVConstants.textPrimaryColor,
         ),
         maxWidth: double.infinity,
       ),
@@ -102,16 +112,19 @@ class TVInfoLeftPanel extends StatelessWidget {
           width: 80,
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
-              color: Colors.grey,
+              color: TVConstants.textTertiaryColor,
             ),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(fontSize: 14),
+            style: TextStyle(
+              fontSize: 14,
+              color: TVConstants.textSecondaryColor,
+            ),
           ),
         ),
       ],
@@ -126,11 +139,12 @@ class TVInfoLeftPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           '标签',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
+            color: TVConstants.textPrimaryColor,
           ),
         ),
         const SizedBox(height: 8),
@@ -141,12 +155,15 @@ class TVInfoLeftPanel extends StatelessWidget {
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
+                color: TVConstants.surfaceVariantColor,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
                 tag.name,
-                style: const TextStyle(fontSize: 12),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: TVConstants.textSecondaryColor,
+                ),
               ),
             );
           }).toList(),
@@ -159,17 +176,22 @@ class TVInfoLeftPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           '简介',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
+            color: TVConstants.textPrimaryColor,
           ),
         ),
         const SizedBox(height: 8),
         Text(
           bangumiItem.summary,
-          style: const TextStyle(fontSize: 14, height: 1.5),
+          style: TextStyle(
+            fontSize: 14,
+            height: 1.5,
+            color: TVConstants.textSecondaryColor,
+          ),
         ),
       ],
     );

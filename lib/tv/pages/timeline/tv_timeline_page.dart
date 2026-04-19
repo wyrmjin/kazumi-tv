@@ -110,9 +110,16 @@ class _TVTimelinePageState extends State<TVTimelinePage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            TVConstants.surfaceColor,
+            TVConstants.backgroundColor,
+          ],
+        ),
         border: Border(
-          bottom: BorderSide(color: const Color(0xFF333333), width: 1),
+          bottom: BorderSide(color: TVConstants.dividerColor, width: 1),
         ),
       ),
       child: TvFocusScope(
@@ -126,13 +133,14 @@ class _TVTimelinePageState extends State<TVTimelinePage> {
           children: _weekdays.asMap().entries.map((entry) {
             final index = entry.key;
             final isSelected = index == _selectedTabIndex;
+            final isTabFocused = _tabItemNodes[index].hasFocus;
 
             final isLastTab = index == _weekdays.length - 1;
             final nextTabNode = isLastTab ? null : _tabItemNodes[index + 1];
             final prevTabNode = index == 0 ? null : _tabItemNodes[index - 1];
 
             return Padding(
-              padding: const EdgeInsets.only(right: 16),
+              padding: const EdgeInsets.only(right: 12),
               child: TvHorizontalListItem(
                 focusNode: _tabItemNodes[index],
                 autofocus: index == _selectedTabIndex,
@@ -149,30 +157,25 @@ class _TVTimelinePageState extends State<TVTimelinePage> {
                 onMoveDown: () => _getGridItemNode(0).requestFocus(),
                 onSelect: () => _handleTabSelected(index, true),
                 child: TvCardVisual(
-                  isFocused: _tabItemNodes[index].hasFocus,
-                  borderRadius: 8,
+                  isFocused: isTabFocused,
+                  borderRadius: 10,
+                  focusColor: TVConstants.focusColor,
                   child: Container(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? const Color(0xFF4338CA)
-                          : const Color(0xFF2D2D2D),
-                      borderRadius: BorderRadius.circular(8),
-                      border: _tabItemNodes[index].hasFocus
-                          ? Border.all(color: Colors.white, width: 2)
-                          : isSelected
-                              ? Border.all(
-                                  color: const Color(0xFF6366F1), width: 2)
-                              : null,
+                          ? TVConstants.focusColor
+                          : TVConstants.surfaceVariantColor,
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
                       entry.value,
                       style: TextStyle(
-                        color: _tabItemNodes[index].hasFocus || isSelected
+                        color: isTabFocused || isSelected
                             ? Colors.white
-                            : const Color(0xFF888888),
-                        fontSize: 16,
+                            : TVConstants.textTertiaryColor,
+                        fontSize: 15,
                         fontWeight:
                             isSelected ? FontWeight.bold : FontWeight.normal,
                       ),

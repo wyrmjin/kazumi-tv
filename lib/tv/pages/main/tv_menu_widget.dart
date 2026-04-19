@@ -27,11 +27,11 @@ class TVMenuWidgetState extends State<TVMenuWidget> {
   final List<FocusNode> _itemFocusNodes = [];
 
   final List<_MenuItemData> _menuItems = [
-    _MenuItemData(Icons.home, '推荐'),
-    _MenuItemData(Icons.schedule, '时间表'),
-    _MenuItemData(Icons.favorite, '追番'),
-    _MenuItemData(Icons.search, '搜索'),
-    _MenuItemData(Icons.settings, '设置'),
+    _MenuItemData(Icons.home_rounded, '推荐'),
+    _MenuItemData(Icons.schedule_rounded, '时间表'),
+    _MenuItemData(Icons.favorite_rounded, '追番'),
+    _MenuItemData(Icons.search_rounded, '搜索'),
+    _MenuItemData(Icons.settings_rounded, '设置'),
   ];
 
   @override
@@ -78,7 +78,22 @@ class TVMenuWidgetState extends State<TVMenuWidget> {
   Widget build(BuildContext context) {
     return Container(
       width: TVConstants.sidebarWidth + 8,
-      color: Colors.black87,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            TVConstants.sidebarGradientStart,
+            TVConstants.sidebarGradientEnd,
+          ],
+        ),
+        border: Border(
+          right: BorderSide(
+            color: TVConstants.borderFaintColor,
+            width: 1,
+          ),
+        ),
+      ),
       child: TvFocusScope(
         pattern: FocusPattern.vertical,
         isFirst: true,
@@ -86,7 +101,9 @@ class TVMenuWidgetState extends State<TVMenuWidget> {
         onExitRight: widget.onExitRight,
         child: Column(
           children: [
-            const SizedBox(height: 48),
+            const SizedBox(height: 32),
+            _buildLogo(),
+            const SizedBox(height: 24),
             Expanded(
               child: ListView.builder(
                 itemCount: _menuItems.length,
@@ -121,6 +138,26 @@ class TVMenuWidgetState extends State<TVMenuWidget> {
                   );
                 },
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLogo() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Text(
+        'K',
+        style: TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: TVConstants.focusColor,
+          shadows: [
+            Shadow(
+              color: TVConstants.focusGlowColor,
+              blurRadius: 12,
             ),
           ],
         ),
@@ -229,7 +266,6 @@ class _FocusableMenuItemState extends State<_FocusableMenuItem>
 
     final key = event.logicalKey;
 
-    // 上键导航
     if (key == LogicalKeyboardKey.arrowUp) {
       if (widget.isFirst) {
         return KeyEventResult.handled;
@@ -238,7 +274,6 @@ class _FocusableMenuItemState extends State<_FocusableMenuItem>
       return KeyEventResult.handled;
     }
 
-    // 下键导航
     if (key == LogicalKeyboardKey.arrowDown) {
       if (widget.isLast) {
         return KeyEventResult.handled;
@@ -247,18 +282,15 @@ class _FocusableMenuItemState extends State<_FocusableMenuItem>
       return KeyEventResult.handled;
     }
 
-    // 确认键
     if (key == LogicalKeyboardKey.enter || key == LogicalKeyboardKey.select) {
       widget.onSelect?.call();
       return KeyEventResult.handled;
     }
 
-    // 左键 - 让外层处理退出
     if (key == LogicalKeyboardKey.arrowLeft) {
       return KeyEventResult.ignored;
     }
 
-    // 右键 - 让外层处理退出
     if (key == LogicalKeyboardKey.arrowRight) {
       return KeyEventResult.ignored;
     }
@@ -293,9 +325,14 @@ class _FocusableMenuItemState extends State<_FocusableMenuItem>
                   boxShadow: _isFocused
                       ? [
                           BoxShadow(
-                            color: TVConstants.focusShadowColor,
-                            blurRadius: 12,
+                            color: TVConstants.focusGlowColor,
+                            blurRadius: 16,
                             spreadRadius: 2,
+                          ),
+                          BoxShadow(
+                            color: TVConstants.focusShadowColor,
+                            blurRadius: 8,
+                            spreadRadius: 1,
                           ),
                         ]
                       : null,
@@ -327,30 +364,60 @@ class _MenuCardContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
       width: TVConstants.sidebarWidth,
       height: TVConstants.sidebarItemHeight,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 24,
-              color: isSelected ? TVConstants.focusColor : Colors.white70,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: isSelected ? TVConstants.focusColor : Colors.white70,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      decoration: BoxDecoration(
+        color: isSelected
+            ? TVConstants.surfaceVariantColor
+            : Colors.transparent,
+      ),
+      child: Stack(
+        children: [
+          if (isSelected)
+            Positioned(
+              left: 0,
+              top: 12,
+              bottom: 12,
+              child: Container(
+                width: 3,
+                decoration: BoxDecoration(
+                  color: TVConstants.focusColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-          ],
-        ),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    size: 28,
+                    color: isSelected
+                        ? TVConstants.focusColor
+                        : TVConstants.textTertiaryColor,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isSelected
+                          ? TVConstants.focusColor
+                          : TVConstants.textTertiaryColor,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

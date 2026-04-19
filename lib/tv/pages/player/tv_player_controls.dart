@@ -8,6 +8,7 @@ import 'widgets/tv_player_button.dart';
 import 'package:kazumi/pages/player/player_controller.dart';
 import 'package:kazumi/pages/video/video_controller.dart';
 import 'package:kazumi/utils/logger.dart';
+import '../../core/utils/tv_constants.dart';
 
 /// TV 播放器控制面板
 ///
@@ -226,7 +227,16 @@ class _TVPlayerControlsState extends State<TVPlayerControls>
           child: Container(
             width: screenWidth,
             height: controlsHeight,
-            color: Colors.black.withOpacity(0.7),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.85),
+                ],
+              ),
+            ),
             child: Column(
               children: [
                 Container(
@@ -243,9 +253,9 @@ class _TVPlayerControlsState extends State<TVPlayerControls>
                     child: ProgressBar(
                       progress: widget.playerController.currentPosition,
                       total: widget.playerController.duration,
-                      progressBarColor: Colors.orange,
+                      progressBarColor: TVConstants.focusColor,
                       baseBarColor: Colors.white24,
-                      thumbColor: Colors.orange,
+                      thumbColor: TVConstants.focusColor,
                       thumbRadius: 8,
                       barHeight: 4,
                       timeLabelTextStyle: const TextStyle(

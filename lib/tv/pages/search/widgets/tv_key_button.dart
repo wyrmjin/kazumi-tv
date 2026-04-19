@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../core/utils/tv_constants.dart';
 
 /// TV虚拟键盘按键组件
 class TVKeyButton extends StatefulWidget {
@@ -43,15 +44,29 @@ class _TVKeyButtonState extends State<TVKeyButton> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         decoration: BoxDecoration(
-          color: _isFocused ? Colors.white : Colors.white12,
-          borderRadius: BorderRadius.circular(8),
-          border: _isFocused ? Border.all(color: Colors.white, width: 2) : null,
+          color: _isFocused ? Colors.white : TVConstants.surfaceVariantColor,
+          borderRadius: BorderRadius.circular(10),
+          border: _isFocused
+              ? Border.all(color: Colors.white, width: 2)
+              : Border.all(
+                  color: TVConstants.borderSubtleColor,
+                  width: TVConstants.unfocusedBorderWidth,
+                ),
+          boxShadow: _isFocused
+              ? [
+                  BoxShadow(
+                    color: TVConstants.focusGlowColor,
+                    blurRadius: 12,
+                    spreadRadius: 1,
+                  ),
+                ]
+              : null,
         ),
         alignment: Alignment.center,
         child: Text(
           widget.label,
           style: TextStyle(
-            color: _isFocused ? Colors.black : Colors.white70,
+            color: _isFocused ? Colors.black : TVConstants.textSecondaryColor,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -141,8 +156,19 @@ class _TVActionButtonState extends State<TVActionButton> {
         duration: const Duration(milliseconds: 150),
         decoration: BoxDecoration(
           color: _isFocused ? Colors.white : widget.color,
-          borderRadius: BorderRadius.circular(8),
-          border: _isFocused ? Border.all(color: Colors.white, width: 2) : null,
+          borderRadius: BorderRadius.circular(10),
+          border: _isFocused
+              ? Border.all(color: Colors.white, width: 2)
+              : null,
+          boxShadow: _isFocused
+              ? [
+                  BoxShadow(
+                    color: TVConstants.focusGlowColor,
+                    blurRadius: 12,
+                    spreadRadius: 1,
+                  ),
+                ]
+              : null,
         ),
         alignment: Alignment.center,
         child: Text(
