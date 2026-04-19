@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../core/utils/tv_constants.dart';
-import '../../core/focus/tv_focus_scope_new.dart';
+import '../../core/focus/tv_focus_scope.dart';
 import '../../core/focus/focus_pattern.dart';
 
 /// TV 侧边菜单组件

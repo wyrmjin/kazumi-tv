@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../utils/tv_constants.dart';
-import '../focus/tv_key_handler_new.dart';
+import '../focus/tv_key_handler.dart';
 
 /// TV 按钮组件
 class TVButton extends StatefulWidget {

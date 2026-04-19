@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:kazumi/pages/search/search_controller.dart';
-import 'package:kazumi/tv/core/focus/tv_focus_scope_new.dart';
+import 'package:kazumi/tv/core/focus/tv_focus_scope.dart';
 import 'package:kazumi/tv/core/focus/focus_pattern.dart';
 import 'package:kazumi/tv/pages/search/widgets/tv_search_keyboard.dart';
 import 'package:kazumi/tv/pages/search/widgets/tv_search_history.dart';

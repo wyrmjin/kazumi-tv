@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kazumi/tv/core/focus/tv_focus_scope_new.dart';
+import 'package:kazumi/tv/core/focus/tv_focus_scope.dart';
 import 'package:kazumi/tv/core/focus/tv_focus_scope_manager.dart';
 import 'package:kazumi/tv/core/focus/tv_list_items.dart';
 import 'package:kazumi/tv/core/focus/focus_pattern.dart';

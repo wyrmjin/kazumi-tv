@@ -4,7 +4,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:kazumi/pages/popular/popular_controller.dart';
 import 'package:kazumi/modules/bangumi/bangumi_item.dart';
 import 'package:kazumi/utils/constants.dart';
-import '../../core/focus/tv_focus_scope_new.dart';
+import '../../core/focus/tv_focus_scope.dart';
 import '../../core/focus/tv_focus_scope_manager.dart';
 import '../../core/focus/focus_pattern.dart';
 import '../../core/focus/tv_list_items.dart';

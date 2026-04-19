@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'focus_pattern.dart';
-import 'tv_focus_scope_new.dart';
+import 'tv_focus_scope.dart';
 import 'tv_grid_boundary.dart';
 
 /// 简化版的垂直焦点列表项

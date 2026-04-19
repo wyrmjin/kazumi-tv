@@ -6,7 +6,7 @@ import 'package:kazumi/pages/timeline/timeline_controller.dart';
 import 'package:kazumi/tv/core/focus/tv_focus_scope_manager.dart';
 
 import '../../core/focus/focus_pattern.dart';
-import '../../core/focus/tv_focus_scope_new.dart';
+import '../../core/focus/tv_focus_scope.dart';
 import '../../core/focus/tv_list_items.dart';
 import '../../core/utils/tv_constants.dart';
 import '../../core/widgets/tv_card_visual.dart';

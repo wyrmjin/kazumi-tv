@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'focus_pattern.dart';
-import 'tv_key_handler_new.dart';
+import 'tv_key_handler.dart';
 
 /// 通用的 TV 焦点容器
 ///

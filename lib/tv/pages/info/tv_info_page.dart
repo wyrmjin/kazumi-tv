@@ -10,7 +10,7 @@ import 'package:kazumi/pages/video/video_controller.dart';
 import 'package:kazumi/modules/bangumi/bangumi_item.dart';
 import 'package:kazumi/bean/dialog/dialog_helper.dart';
 import 'package:kazumi/utils/logger.dart';
-import 'package:kazumi/tv/core/focus/tv_key_handler_new.dart';
+import 'package:kazumi/tv/core/focus/tv_key_handler.dart';
 
 class TVInfoPage extends StatefulWidget {
   final BangumiItem bangumiItem;

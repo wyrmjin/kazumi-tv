@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kazumi/tv/core/focus/focus_pattern.dart';
-import 'package:kazumi/tv/core/focus/tv_focus_scope_new.dart';
+import 'package:kazumi/tv/core/focus/tv_focus_scope.dart';
 
 void main() {
   group('TvFocusScope', () {
