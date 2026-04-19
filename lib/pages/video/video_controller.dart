@@ -291,13 +291,13 @@ abstract class _VideoPageController with Store {
     });
 
     try {
-      final bool isTv = await PlatformDetector.isAndroidTV();
+      final isTv = await PlatformDetector.isAndroidTV();
       final source = await _videoSourceProvider!.resolve(
         url,
         useLegacyParser: currentPlugin.useLegacyParser,
         offset: offset,
         timeout: isTv
-            ? const Duration(seconds: 30)
+            ? const Duration(seconds: 45)
             : const Duration(seconds: 15),
       );
 

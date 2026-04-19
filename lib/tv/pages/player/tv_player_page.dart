@@ -64,6 +64,8 @@ class _TVPlayerPageState extends State<TVPlayerPage> {
   String _seekDirection = 'forward';
   Timer? _seekExecuteTimer;
   Timer? _seekAccumulateTimer;
+  // Prevents double-pop from both key handler and system back gesture
+  bool _isExiting = false;
 
   static const int _seekStep = 10;
 
@@ -395,15 +397,23 @@ class _TVPlayerPageState extends State<TVPlayerPage> {
   }
 
   void _exitPlayer() {
+    if (_isExiting) return;
+    _isExiting = true;
     playerController.pause();
     Modular.to.pop();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Focus(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _exitPlayer();
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: Focus(
         focusNode: _pageFocusNode,
         onKeyEvent: _handleKeyEvent,
         child: Stack(
@@ -499,6 +509,7 @@ class _TVPlayerPageState extends State<TVPlayerPage> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 }

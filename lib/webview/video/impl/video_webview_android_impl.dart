@@ -1,18 +1,21 @@
 import 'dart:async';
-import 'package:kazumi/utils/utils.dart';
-import 'package:kazumi/utils/storage.dart';
-import 'package:kazumi/utils/proxy_utils.dart';
-import 'package:kazumi/utils/logger.dart';
-import 'package:kazumi/webview/video/video_webview_controller.dart';
-import 'package:flutter_inappwebview_platform_interface/flutter_inappwebview_platform_interface.dart';
+
 import 'package:flutter_inappwebview_android/flutter_inappwebview_android.dart'
     as android_webview;
+import 'package:flutter_inappwebview_platform_interface/flutter_inappwebview_platform_interface.dart';
+import 'package:kazumi/utils/logger.dart';
+import 'package:kazumi/utils/proxy_utils.dart';
+import 'package:kazumi/utils/storage.dart';
+import 'package:kazumi/utils/utils.dart';
+import 'package:kazumi/webview/video/video_webview_controller.dart';
 
 class VideoWebviewAndroidImpl
     extends VideoWebviewController<PlatformInAppWebViewController> {
   PlatformHeadlessInAppWebView? headlessWebView;
   bool hasInjectedScripts = false;
   bool shouldInjectIframeRedirect = false;
+  bool useLegacyParser = false;
+  Timer? videoParserTimer;
 
   @override
   Future<void> init() async {
@@ -35,11 +38,30 @@ class VideoWebviewAndroidImpl
           webviewController = controller;
           initEventController.add(true);
         },
+        shouldInterceptRequest: (controller, request) async {
+          if (useLegacyParser || isVideoSourceLoaded) return null;
+          final url = request.url.toString();
+          final lower = url.toLowerCase();
+          if (_isAdUrl(lower)) return null;
+          if (_isM3U8Url(lower) ||
+              _isRangeVideoRequest(lower, request.headers)) {
+            logEventController.add('Native intercepted video URL: $url');
+            isIframeLoaded = true;
+            isVideoSourceLoaded = true;
+            videoLoadingEventController.add(false);
+            unloadPage();
+            videoParserEventController.add((url, offset));
+          }
+          return null;
+        },
         onLoadStart: (controller, url) async {
           logEventController.add('started loading: $url');
         },
         onLoadStop: (controller, url) {
           logEventController.add('loading completed: $url');
+          if (url.toString() != 'about:blank') {
+            _startVideoParserTimer();
+          }
         },
       ),
     );
@@ -56,6 +78,7 @@ class VideoWebviewAndroidImpl
       hasInjectedScripts = true;
     }
     count = 0;
+    this.useLegacyParser = useLegacyParser;
     this.offset = offset;
     isIframeLoaded = false;
     isVideoSourceLoaded = false;
@@ -87,11 +110,7 @@ class VideoWebviewAndroidImpl
             logEventController.add(
                 'If there is audio but no video, please report it to the rule developer.');
             if ((message.contains('http') || message.startsWith('//')) &&
-                !message.contains('googleads') &&
-                !message.contains('googlesyndication.com') &&
-                !message.contains('prestrain.html') &&
-                !message.contains('prestrain%2Ehtml') &&
-                !message.contains('adtrafficquality')) {
+                !_isAdUrl(message.toLowerCase())) {
               logEventController.add('Parsing video source $message');
               String encodedUrl = Uri.encodeFull(message);
               if (Utils.decodeVideoSource(encodedUrl) != encodedUrl) {
@@ -273,17 +292,120 @@ class VideoWebviewAndroidImpl
     );
   }
 
+  void _cancelVideoParserTimer() {
+    videoParserTimer?.cancel();
+    videoParserTimer = null;
+  }
+
   @override
   Future<void> unloadPage() async {
+    _cancelVideoParserTimer();
     await webviewController!
         .loadUrl(urlRequest: URLRequest(url: WebUri("about:blank")));
   }
 
   @override
   void dispose() {
+    _cancelVideoParserTimer();
     headlessWebView?.dispose();
     headlessWebView = null;
     webviewController = null;
+  }
+
+  static const int _maxPollRetries = 15;
+  int _pollRetries = 0;
+
+  void _startVideoParserTimer() {
+    _cancelVideoParserTimer();
+    _pollRetries = 0;
+    logEventController.add('Starting video parser timer');
+    videoParserTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (isVideoSourceLoaded || _pollRetries >= _maxPollRetries) {
+        timer.cancel();
+        return;
+      }
+      _pollRetries++;
+      _pollVideoSource().catchError((e) {
+        logEventController.add('Video parser poll error: $e');
+      });
+    });
+  }
+
+  Future<void> _pollVideoSource() async {
+    if (useLegacyParser) {
+      await webviewController?.evaluateJavascript(source: """
+        (function() {
+          var iframes = document.querySelectorAll('iframe');
+          window.flutter_inappwebview.callHandler('LogBridge', 'Timer scan: found ' + iframes.length + ' iframe(s)');
+          for (var i = 0; i < iframes.length; i++) {
+            var src = iframes[i].getAttribute('src');
+            if (src) {
+              window.flutter_inappwebview.callHandler('JSBridgeDebug', src);
+            }
+          }
+        })();
+      """);
+    } else {
+      await webviewController?.evaluateJavascript(source: """
+        (function() {
+          var videos = document.querySelectorAll('video');
+          window.flutter_inappwebview.callHandler('LogBridge', 'Timer scan: found ' + videos.length + ' video element(s)');
+          for (var i = 0; i < videos.length; i++) {
+            var src = videos[i].getAttribute('src');
+            if (src && src.trim() !== '' && !src.startsWith('blob:') && !src.includes('googleads')) {
+              window.flutter_inappwebview.callHandler('LogBridge', 'VIDEO source found: ' + src);
+              window.flutter_inappwebview.callHandler('VideoBridgeDebug', src);
+              return;
+            }
+            var sources = videos[i].getElementsByTagName('source');
+            for (var j = 0; j < sources.length; j++) {
+              src = sources[j].getAttribute('src');
+              if (src && src.trim() !== '' && !src.startsWith('blob:') && !src.includes('googleads')) {
+                window.flutter_inappwebview.callHandler('LogBridge', 'VIDEO source found (source tag): ' + src);
+                window.flutter_inappwebview.callHandler('VideoBridgeDebug', src);
+                return;
+              }
+            }
+          }
+        })();
+      """);
+    }
+  }
+
+  bool _isM3U8Url(String lower) => lower.contains('.m3u8');
+
+  static const _nonVideoExtensions = {
+    '.js',
+    '.css',
+    '.html',
+    '.json',
+    '.png',
+    '.jpg',
+    '.gif',
+    '.svg',
+    '.woff',
+    '.woff2',
+    '.wasm',
+  };
+
+  bool _isRangeVideoRequest(String lower, Map<String, String>? headers) {
+    if (headers == null) return false;
+    final range = headers['Range'] ?? headers['range'];
+    if (range == null || !range.startsWith('bytes=')) return false;
+    return !_nonVideoExtensions.any((ext) => lower.endsWith(ext));
+  }
+
+  static const _adDomains = [
+    'googleads',
+    'googlesyndication',
+    'adtrafficquality',
+    'doubleclick',
+    'prestrain.html',
+    'prestrain%2e.html',
+  ];
+
+  bool _isAdUrl(String lower) {
+    return _adDomains.any(lower.contains);
   }
 
   Future<void> _setupProxy() async {
