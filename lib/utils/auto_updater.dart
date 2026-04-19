@@ -5,6 +5,7 @@ import 'package:hive_ce/hive.dart';
 import 'package:kazumi/bean/dialog/dialog_helper.dart';
 import 'package:kazumi/request/api.dart';
 import 'package:kazumi/utils/logger.dart';
+import 'package:kazumi/utils/platform_detector.dart';
 import 'package:kazumi/utils/storage.dart';
 import 'package:kazumi/utils/utils.dart';
 import 'package:open_filex/open_filex.dart';
@@ -102,7 +103,8 @@ class AutoUpdater {
   /// 检查是否有新版本可用
   Future<UpdateInfo?> checkForUpdates() async {
     try {
-      final response = await _dio.get(Api.latestApp);
+      bool isTv = await PlatformDetector.isTVPlatform();
+      final response = await _dio.get(isTv ? Api.latestTvApp : Api.latestApp);
       final data = response.data;
 
       if (data == null || !data.containsKey('tag_name')) {
@@ -599,7 +601,8 @@ class AutoUpdater {
         final localHash = await Utils.calculateFileHash(file);
         if (localHash == expectedHash) {
           // 文件已存在且哈希匹配，直接返回
-          KazumiLogger().i('Update: file already exists and hash verified, skipping download: $filePath');
+          KazumiLogger().i(
+              'Update: file already exists and hash verified, skipping download: $filePath');
           _downloadProgress.value = 1.0;
           return filePath;
         } else {
@@ -610,7 +613,9 @@ class AutoUpdater {
         }
       } catch (e) {
         // 验证过程中出错，删除文件重新下载
-        KazumiLogger().w('Update: file verification failed, deleting and re-downloading', error: e);
+        KazumiLogger().w(
+            'Update: file verification failed, deleting and re-downloading',
+            error: e);
         if (await file.exists()) {
           await file.delete();
         }
@@ -704,7 +709,9 @@ class AutoUpdater {
           final arg = '/select,${filePath.replaceAll('/', r'\')}';
           await Process.start('explorer.exe', [arg], runInShell: true);
         } else {
-          await Process.start('explorer.exe', [targetDirOrFile.replaceAll('/', r'\')], runInShell: true);
+          await Process.start(
+              'explorer.exe', [targetDirOrFile.replaceAll('/', r'\')],
+              runInShell: true);
         }
       } else if (Platform.isMacOS) {
         if (type == FileSystemEntityType.file) {
