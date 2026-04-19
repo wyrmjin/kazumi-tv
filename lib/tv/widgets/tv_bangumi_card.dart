@@ -27,6 +27,8 @@ class TVBangumiCard extends StatelessWidget {
   final double width;
   final double height;
 
+  bool get _isFocused => isFocused ?? false;
+
   String get _coverUrl =>
       bangumiItem.images['large'] ?? bangumiItem.images['common'] ?? '';
 
@@ -36,7 +38,7 @@ class TVBangumiCard extends StatelessWidget {
       return GestureDetector(
         onTap: onSelect,
         child: TvCardVisual(
-          isFocused: isFocused!,
+          isFocused: _isFocused,
           width: width,
           height: height,
           child: _buildCardContent(),
@@ -72,14 +74,21 @@ class TVBangumiCard extends StatelessWidget {
       memCacheWidth: (width * 2).toInt(),
       memCacheHeight: (height * 2).toInt(),
       placeholder: (context, url) => Container(
-        color: Colors.grey[800],
-        child: const Center(
-          child: CircularProgressIndicator(strokeWidth: 2),
+        color: TVConstants.surfaceVariantColor,
+        child: Center(
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: TVConstants.focusShadowColor,
+            ),
+          ),
         ),
       ),
       errorWidget: (context, url, error) => Container(
-        color: Colors.grey[800],
-        child: const Icon(Icons.broken_image, color: Colors.white54),
+        color: TVConstants.surfaceVariantColor,
+        child: Icon(Icons.broken_image, color: TVConstants.textDisabledColor),
       ),
     );
   }
@@ -90,15 +99,17 @@ class TVBangumiCard extends StatelessWidget {
       right: 0,
       bottom: 0,
       child: Container(
-        height: height * 0.4,
+        height: height * 0.45,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
               Colors.transparent,
-              Colors.black.withValues(alpha: 0.9),
+              TVConstants.overlayMid,
+              TVConstants.overlayStrong,
             ],
+            stops: const [0.0, 0.4, 1.0],
           ),
         ),
       ),
@@ -106,6 +117,8 @@ class TVBangumiCard extends StatelessWidget {
   }
 
   Widget _buildInfoSection() {
+    final titleSize = _isFocused ? 17.0 : TVConstants.titleFontSize;
+
     return Positioned(
       left: 8,
       right: 8,
@@ -115,10 +128,16 @@ class TVBangumiCard extends StatelessWidget {
         children: [
           TVMarquee(
             text: bangumiItem.name,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: TVConstants.titleFontSize,
+            style: TextStyle(
+              color: TVConstants.textPrimaryColor,
+              fontSize: titleSize,
               fontWeight: FontWeight.bold,
+              shadows: const [
+                Shadow(
+                  color: Colors.black54,
+                  blurRadius: 4,
+                ),
+              ],
             ),
             maxWidth: width - 16,
           ),
@@ -126,9 +145,15 @@ class TVBangumiCard extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               bangumiItem.nameCn,
-              style: const TextStyle(
-                color: Colors.white70,
+              style: TextStyle(
+                color: TVConstants.textSecondaryColor,
                 fontSize: TVConstants.subtitleFontSize,
+                shadows: const [
+                  Shadow(
+                    color: Colors.black54,
+                    blurRadius: 4,
+                  ),
+                ],
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

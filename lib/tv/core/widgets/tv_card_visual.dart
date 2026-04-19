@@ -28,8 +28,10 @@ class TvCardVisual extends StatelessWidget {
     return AnimatedScale(
       scale: isFocused ? TVConstants.focusScale : 1.0,
       duration: TVConstants.focusAnimDuration,
-      curve: TVConstants.focusCurve,
-      child: Container(
+      curve: TVConstants.focusBounceCurve,
+      child: AnimatedContainer(
+        duration: TVConstants.focusAnimDuration,
+        curve: TVConstants.focusCurve,
         width: width,
         height: height,
         decoration: BoxDecoration(
@@ -39,13 +41,21 @@ class TvCardVisual extends StatelessWidget {
                   color: focusColor ?? Colors.white,
                   width: TVConstants.focusBorderWidth,
                 )
-              : null,
+              : Border.all(
+                  color: TVConstants.borderSubtleColor,
+                  width: TVConstants.unfocusedBorderWidth,
+                ),
           boxShadow: isFocused
               ? [
                   BoxShadow(
-                    color: TVConstants.focusShadowColor,
-                    blurRadius: 12,
+                    color: TVConstants.focusGlowColor,
+                    blurRadius: TVConstants.focusElevation,
                     spreadRadius: 2,
+                  ),
+                  BoxShadow(
+                    color: TVConstants.focusShadowColor,
+                    blurRadius: 8,
+                    spreadRadius: 0,
                   ),
                 ]
               : null,

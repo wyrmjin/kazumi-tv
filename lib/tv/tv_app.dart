@@ -32,25 +32,79 @@ class _TVAppState extends State<TVApp> {
         useMaterial3: true,
         brightness: Brightness.dark,
         primaryColor: TVConstants.focusColor,
-        scaffoldBackgroundColor: Colors.black,
+        scaffoldBackgroundColor: TVConstants.backgroundColor,
+        fontFamily: 'MI_Sans_Regular',
         colorScheme: const ColorScheme.dark(
           primary: TVConstants.focusColor,
           secondary: TVConstants.focusColor,
-          surface: Colors.black,
+          surface: TVConstants.backgroundColor,
+          onSurface: TVConstants.textPrimaryColor,
+          surfaceContainerHighest: TVConstants.surfaceVariantColor,
+        ),
+        cardTheme: CardThemeData(
+          color: TVConstants.surfaceVariantColor,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        dialogTheme: DialogThemeData(
+          backgroundColor: TVConstants.surfaceColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          titleTextStyle: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: TVConstants.textPrimaryColor,
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: TVConstants.focusColor,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
         ),
         textTheme: const TextTheme(
           headlineLarge: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: TVConstants.textPrimaryColor,
+          ),
+          headlineMedium: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+            color: TVConstants.textPrimaryColor,
+          ),
+          titleLarge: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: TVConstants.textPrimaryColor,
+          ),
+          titleMedium: TextStyle(
+            fontSize: TVConstants.titleFontSize,
+            fontWeight: FontWeight.w500,
+            color: TVConstants.textPrimaryColor,
           ),
           bodyLarge: TextStyle(
             fontSize: TVConstants.titleFontSize,
-            color: Colors.white,
+            color: TVConstants.textSecondaryColor,
           ),
           bodyMedium: TextStyle(
             fontSize: TVConstants.subtitleFontSize,
-            color: Colors.white70,
+            color: TVConstants.textTertiaryColor,
+          ),
+          labelLarge: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: TVConstants.textSecondaryColor,
+          ),
+          labelSmall: TextStyle(
+            fontSize: 12,
+            color: TVConstants.textDisabledColor,
           ),
         ),
       ),
