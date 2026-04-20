@@ -26,11 +26,6 @@
 
 我们不收集任何用户数据, 不使用任何遥测组件。
 
-## 代码签名策略 (Code signing policy)
-
-提交者: [Contributors](https://github.com/Predidit/Kazumi/graphs/contributors)
-审阅者: [Owner](https://github.com/Predidit)
-
 ## 致谢
 
 特别感谢 [Predidit](https://github.com/Predidit) 以及 [Kazumi](https://github.com/Predidit/Kazumi) 项目，本项目基于 Kazumi 进行 Android TV 适配。
