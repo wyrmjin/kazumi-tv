@@ -235,56 +235,58 @@ class _TVPopularPageState extends State<TVPopularPage> {
 
                 final isLastTab = index == _tabs.length - 1;
                 final nextTabNode = isLastTab ? null : _tabItemNodes[index + 1];
-                final prevTabNode = index == 0 ? null : _tabItemNodes[index - 1];
+                final prevTabNode =
+                    index == 0 ? null : _tabItemNodes[index - 1];
 
                 return Center(
                   key: _tabKeys[index],
                   child: Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: TvHorizontalListItem(
-                    focusNode: _tabItemNodes[index],
-                    autofocus: index == _selectedTabIndex,
-                    onFocusChange: (focused) {
-                      if (focused && index != _selectedTabIndex) {
-                        _handleTabSelected(index, false);
-                      } else if (focused) {
-                        _scrollTabToVisible(index);
-                      }
-                      setState(() {});
-                    },
-                    isFirst: index == 0,
-                    isLast: isLastTab,
-                    exitLeft: prevTabNode,
-                    exitRight: nextTabNode,
-                    onMoveDown: () => _getGridItemNode(0).requestFocus(),
-                    onSelect: () => _handleTabSelected(index, true),
-                    child: TvCardVisual(
-                      isFocused: isTabFocused,
-                      borderRadius: 10,
-                      focusColor: TVConstants.focusColor,
-                      child: Container(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? TVConstants.focusColor
-                              : TVConstants.surfaceVariantColor,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          entry.value.isEmpty ? '热门番组' : entry.value,
-                          style: TextStyle(
-                            color: isTabFocused || isSelected
-                                ? Colors.white
-                                : TVConstants.textTertiaryColor,
-                            fontSize: 15,
-                            fontWeight:
-                                isSelected ? FontWeight.bold : FontWeight.normal,
+                    padding: const EdgeInsets.only(right: 12),
+                    child: TvHorizontalListItem(
+                      focusNode: _tabItemNodes[index],
+                      autofocus: index == _selectedTabIndex,
+                      onFocusChange: (focused) {
+                        if (focused && index != _selectedTabIndex) {
+                          _handleTabSelected(index, false);
+                        } else if (focused) {
+                          _scrollTabToVisible(index);
+                        }
+                        setState(() {});
+                      },
+                      isFirst: index == 0,
+                      isLast: isLastTab,
+                      exitLeft: prevTabNode,
+                      exitRight: nextTabNode,
+                      onMoveDown: () => _getGridItemNode(0).requestFocus(),
+                      onSelect: () => _handleTabSelected(index, true),
+                      child: TvCardVisual(
+                        isFocused: isTabFocused,
+                        borderRadius: 10,
+                        focusColor: TVConstants.focusColor,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? TVConstants.focusColor
+                                : TVConstants.surfaceVariantColor,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            entry.value.isEmpty ? '热门番组' : entry.value,
+                            style: TextStyle(
+                              color: isTabFocused || isSelected
+                                  ? Colors.white
+                                  : TVConstants.textTertiaryColor,
+                              fontSize: 15,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
                   ),
                 );
               }).toList(),

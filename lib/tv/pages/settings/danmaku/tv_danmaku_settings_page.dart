@@ -37,7 +37,7 @@ class _TVDanmakuSettingsPageState extends State<TVDanmakuSettingsPage> {
   @override
   void initState() {
     super.initState();
-    danmakuEnabled = setting.get('danmakuEnabled', defaultValue: true);
+    danmakuEnabled = setting.get(SettingBoxKey.danmakuEnabledByDefault, defaultValue: false);
     danmakuFontSize =
         setting.get(SettingBoxKey.danmakuFontSize, defaultValue: 25.0);
     danmakuOpacity =
@@ -52,7 +52,7 @@ class _TVDanmakuSettingsPageState extends State<TVDanmakuSettingsPage> {
   }
 
   void updateDanmakuEnabled(bool value) {
-    setting.put('danmakuEnabled', value);
+    setting.put(SettingBoxKey.danmakuEnabledByDefault, value);
     setState(() {
       danmakuEnabled = value;
     });

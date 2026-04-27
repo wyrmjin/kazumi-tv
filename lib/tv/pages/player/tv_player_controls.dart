@@ -334,7 +334,6 @@ class _TVPlayerControlsState extends State<TVPlayerControls>
               : Icons.comments_disabled,
           onTap: widget.onDanmakuToggle,
           autofocus: false,
-          enabled: widget.playerController.danmakuOn,
         ),
       ),
     );
