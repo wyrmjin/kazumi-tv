@@ -10,9 +10,9 @@
 
 ## 下载
 
-通过本仓库 [releases](https://github.com/sojasosse/kazumi-tv/releases) 选项卡下载：
+通过本仓库 [releases](https://github.com/wyrmjin/kazumi-tv/releases) 选项卡下载：
 
-<a href="https://github.com/sojasosse/kazumi-tv/releases">
+<a href="https://github.com/wyrmjin/kazumi-tv/releases">
   <img src="static/svg/get_it_on_github.svg" alt="Get it on Github" width="200"/>
 </a>
 
@@ -39,6 +39,8 @@
 特别感谢 [Anime4K](https://github.com/bloc97/Anime4K) 本项目使用 Anime4K 进行实时超分。
 
 特别感谢 [SyncPlay](https://github.com/Syncplay/syncplay) 本项目使用 SyncPlay 协议并通过 SyncPlay 公共服务器实现一起看功能。
+
+特别感谢 [trace.moe](https://trace.moe) 本项目使用了 trace.moe 提供的图片识别番剧功能。
 
 感谢 [media-kit](https://github.com/media-kit/media-kit) 本项目跨平台媒体播放能力来自 media-kit。
 
