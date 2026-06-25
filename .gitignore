@@ -57,3 +57,6 @@ android/build/reports/problems/
 
 # Claude Code
 .claude/
+
+kazumi-key-gen.sh
+kazumi-tv-release.keystore
